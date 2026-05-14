@@ -32,6 +32,21 @@ function ApartmentDetail() {
     },
   });
 
+  const { data: bookedRanges } = useQuery({
+    queryKey: ["apartment-booked", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_apartment_booked_ranges", { _apartment_id: id });
+      if (error) throw error;
+      return (data ?? []) as { check_in: string; check_out: string }[];
+    },
+  });
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const onBook = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
