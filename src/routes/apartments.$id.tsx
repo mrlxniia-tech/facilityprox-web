@@ -32,6 +32,15 @@ function ApartmentDetail() {
     },
   });
 
+  const { data: bookedRanges } = useQuery({
+    queryKey: ["apartment-booked", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_apartment_booked_ranges", { _apartment_id: id });
+      if (error) throw error;
+      return (data ?? []) as { check_in: string; check_out: string }[];
+    },
+  });
+
   const onBook = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
@@ -112,8 +121,8 @@ function ApartmentDetail() {
                 <span className="text-muted-foreground"> /nuit</span>
               </div>
               <form onSubmit={onBook} className="space-y-3">
-                <Field label="Arrivée"><input name="checkIn" type="date" required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
-                <Field label="Départ"><input name="checkOut" type="date" required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
+                <Field label="Arrivée"><input name="checkIn" type="date" min={new Date().toISOString().slice(0,10)} required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
+                <Field label="Départ"><input name="checkOut" type="date" min={new Date().toISOString().slice(0,10)} required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
                 <Field label="Voyageurs">
                   <input name="guests" type="number" defaultValue={1} min={1} max={apt.capacity} required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" />
                 </Field>
@@ -128,6 +137,18 @@ function ApartmentDetail() {
                   Le paiement Stripe sera ajouté à l'étape suivante.
                 </p>
               </form>
+              {bookedRanges && bookedRanges.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-xs font-semibold tracking-wider text-muted-foreground mb-2">PÉRIODES DÉJÀ RÉSERVÉES</p>
+                  <ul className="space-y-1 text-xs">
+                    {bookedRanges.map((r, i) => (
+                      <li key={i} className="text-muted-foreground">
+                        {new Date(r.check_in).toLocaleDateString("fr-FR")} → {new Date(r.check_out).toLocaleDateString("fr-FR")}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </aside>
           </div>
         )}

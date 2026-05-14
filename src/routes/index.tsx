@@ -35,7 +35,7 @@ function Index() {
 }
 
 function Header() {
-  const { user, signOut } = useAuth();
+  const { user, roles, signOut } = useAuth();
   return (
     <header className="mx-auto max-w-6xl px-4 pt-8 pb-6 flex items-center justify-between">
       <Link to="/" className="flex items-center gap-3">
@@ -47,6 +47,15 @@ function Header() {
       </Link>
       <div className="flex items-center gap-3 sm:gap-4 text-sm">
         <Link to="/apartments" className="text-muted-foreground hover:text-foreground hidden sm:inline">Appartements</Link>
+        {user && (
+          <Link to="/my-bookings" className="text-muted-foreground hover:text-foreground hidden sm:inline">Mes résas</Link>
+        )}
+        {user && (roles.includes("owner") || roles.includes("admin")) && (
+          <Link to="/owner" className="text-muted-foreground hover:text-foreground hidden sm:inline">Propriétaire</Link>
+        )}
+        {user && roles.includes("admin") && (
+          <Link to="/admin" className="text-muted-foreground hover:text-foreground hidden sm:inline">Admin</Link>
+        )}
         {user ? (
           <button
             onClick={() => signOut()}
