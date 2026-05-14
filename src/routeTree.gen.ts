@@ -9,12 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ApartmentsRouteImport } from './routes/apartments'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApartmentsIdRouteImport } from './routes/apartments.$id'
 
+const MyBookingsRoute = MyBookingsRouteImport.update({
+  id: '/my-bookings',
+  path: '/my-bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApartmentsRoute = ApartmentsRouteImport.update({
+  id: '/apartments',
+  path: '/apartments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +35,76 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApartmentsIdRoute = ApartmentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApartmentsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/my-bookings': typeof MyBookingsRoute
+  '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/my-bookings': typeof MyBookingsRoute
+  '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/my-bookings': typeof MyBookingsRoute
+  '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths: '/' | '/apartments' | '/auth' | '/my-bookings' | '/apartments/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth'
-  id: '__root__' | '/' | '/auth'
+  to: '/' | '/apartments' | '/auth' | '/my-bookings' | '/apartments/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/apartments'
+    | '/auth'
+    | '/my-bookings'
+    | '/apartments/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApartmentsRoute: typeof ApartmentsRouteWithChildren
   AuthRoute: typeof AuthRoute
+  MyBookingsRoute: typeof MyBookingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/my-bookings': {
+      id: '/my-bookings'
+      path: '/my-bookings'
+      fullPath: '/my-bookings'
+      preLoaderRoute: typeof MyBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apartments': {
+      id: '/apartments'
+      path: '/apartments'
+      fullPath: '/apartments'
+      preLoaderRoute: typeof ApartmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +114,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/apartments/$id': {
+      id: '/apartments/$id'
+      path: '/$id'
+      fullPath: '/apartments/$id'
+      preLoaderRoute: typeof ApartmentsIdRouteImport
+      parentRoute: typeof ApartmentsRoute
+    }
   }
 }
 
+interface ApartmentsRouteChildren {
+  ApartmentsIdRoute: typeof ApartmentsIdRoute
+}
+
+const ApartmentsRouteChildren: ApartmentsRouteChildren = {
+  ApartmentsIdRoute: ApartmentsIdRoute,
+}
+
+const ApartmentsRouteWithChildren = ApartmentsRoute._addFileChildren(
+  ApartmentsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApartmentsRoute: ApartmentsRouteWithChildren,
   AuthRoute: AuthRoute,
+  MyBookingsRoute: MyBookingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
