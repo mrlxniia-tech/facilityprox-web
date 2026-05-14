@@ -23,7 +23,7 @@ function AdminPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) return navigate({ to: "/auth" });
+    if (!user) { navigate({ to: "/auth" }); return; }
     if (!roles.includes("admin")) {
       toast.error("Accès admin requis");
       navigate({ to: "/" });
