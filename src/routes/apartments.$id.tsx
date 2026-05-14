@@ -40,12 +40,6 @@ function ApartmentDetail() {
       return (data ?? []) as { check_in: string; check_out: string }[];
     },
   });
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const onBook = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
