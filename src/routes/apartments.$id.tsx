@@ -121,8 +121,8 @@ function ApartmentDetail() {
                 <span className="text-muted-foreground"> /nuit</span>
               </div>
               <form onSubmit={onBook} className="space-y-3">
-                <Field label="Arrivée"><input name="checkIn" type="date" required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
-                <Field label="Départ"><input name="checkOut" type="date" required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
+                <Field label="Arrivée"><input name="checkIn" type="date" min={new Date().toISOString().slice(0,10)} required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
+                <Field label="Départ"><input name="checkOut" type="date" min={new Date().toISOString().slice(0,10)} required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" /></Field>
                 <Field label="Voyageurs">
                   <input name="guests" type="number" defaultValue={1} min={1} max={apt.capacity} required className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" />
                 </Field>
