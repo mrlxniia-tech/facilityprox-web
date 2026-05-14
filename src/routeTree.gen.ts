@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ApartmentsRouteImport } from './routes/apartments'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApartmentsIdRouteImport } from './routes/apartments.$id'
 
+const OwnerRoute = OwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MyBookingsRoute = MyBookingsRouteImport.update({
   id: '/my-bookings',
   path: '/my-bookings',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/my-bookings': typeof MyBookingsRoute
+  '/owner': typeof OwnerRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/my-bookings': typeof MyBookingsRoute
+  '/owner': typeof OwnerRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,33 @@ export interface FileRoutesById {
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/my-bookings': typeof MyBookingsRoute
+  '/owner': typeof OwnerRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/apartments' | '/auth' | '/my-bookings' | '/apartments/$id'
+  fullPaths:
+    | '/'
+    | '/apartments'
+    | '/auth'
+    | '/my-bookings'
+    | '/owner'
+    | '/apartments/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/apartments' | '/auth' | '/my-bookings' | '/apartments/$id'
+  to:
+    | '/'
+    | '/apartments'
+    | '/auth'
+    | '/my-bookings'
+    | '/owner'
+    | '/apartments/$id'
   id:
     | '__root__'
     | '/'
     | '/apartments'
     | '/auth'
     | '/my-bookings'
+    | '/owner'
     | '/apartments/$id'
   fileRoutesById: FileRoutesById
 }
@@ -82,10 +104,18 @@ export interface RootRouteChildren {
   ApartmentsRoute: typeof ApartmentsRouteWithChildren
   AuthRoute: typeof AuthRoute
   MyBookingsRoute: typeof MyBookingsRoute
+  OwnerRoute: typeof OwnerRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/owner': {
+      id: '/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof OwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/my-bookings': {
       id: '/my-bookings'
       path: '/my-bookings'
@@ -141,6 +171,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApartmentsRoute: ApartmentsRouteWithChildren,
   AuthRoute: AuthRoute,
   MyBookingsRoute: MyBookingsRoute,
+  OwnerRoute: OwnerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
