@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import apt1 from "@/assets/apartment-1.jpg";
 import apt2 from "@/assets/apartment-2.jpg";
-import { Calendar, CreditCard, FileText, HandCoins, Play, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, CreditCard, FileText, HandCoins, LogOut, Play, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   component: Index,
