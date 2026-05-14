@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import apt1 from "@/assets/apartment-1.jpg";
 import apt2 from "@/assets/apartment-2.jpg";
-import { Calendar, CreditCard, FileText, HandCoins, Play, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, CreditCard, FileText, HandCoins, LogOut, Play, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -34,23 +35,34 @@ function Index() {
 }
 
 function Header() {
+  const { user, signOut } = useAuth();
   return (
     <header className="mx-auto max-w-6xl px-4 pt-8 pb-6 flex items-center justify-between">
-      <div className="flex items-center gap-3">
+      <Link to="/" className="flex items-center gap-3">
         <img src={logo} alt="FacilityProx logo" className="h-16 w-16 rounded-full object-cover ring-1 ring-white/10" />
         <div className="leading-tight">
           <h1 className="text-2xl font-extrabold tracking-wide" style={{ color: teal }}>FACILITYPROX</h1>
           <p className="text-[11px] tracking-[0.3em] text-muted-foreground">POUR VOUS AIDER</p>
         </div>
-      </div>
-      <div className="flex items-center gap-6 text-sm">
-        <a href="#aide" className="text-muted-foreground hover:text-foreground">AIDE</a>
-        <button
-          className="rounded-md px-5 py-2 text-sm font-semibold"
-          style={{ background: teal, color: "oklch(0.15 0.02 200)" }}
-        >
-          CONNEXION
-        </button>
+      </Link>
+      <div className="flex items-center gap-3 sm:gap-4 text-sm">
+        <Link to="/apartments" className="text-muted-foreground hover:text-foreground hidden sm:inline">Appartements</Link>
+        {user ? (
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-2 rounded-md px-3 sm:px-4 py-2 text-sm font-semibold border border-white/20 hover:bg-white/5"
+          >
+            <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">Déconnexion</span>
+          </button>
+        ) : (
+          <Link
+            to="/auth"
+            className="rounded-md px-4 sm:px-5 py-2 text-sm font-semibold"
+            style={{ background: teal, color: "oklch(0.15 0.02 200)" }}
+          >
+            CONNEXION
+          </Link>
+        )}
       </div>
     </header>
   );
