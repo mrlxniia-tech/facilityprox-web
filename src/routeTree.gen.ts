@@ -13,6 +13,7 @@ import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ApartmentsRouteImport } from './routes/apartments'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApartmentsIdRouteImport } from './routes/apartments.$id'
 
@@ -36,6 +37,11 @@ const ApartmentsRoute = ApartmentsRouteImport.update({
   path: '/apartments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +55,7 @@ const ApartmentsIdRoute = ApartmentsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/my-bookings': typeof MyBookingsRoute
@@ -76,6 +85,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/apartments'
     | '/auth'
     | '/my-bookings'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/apartments'
     | '/auth'
     | '/my-bookings'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/apartments'
     | '/auth'
     | '/my-bookings'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ApartmentsRoute: typeof ApartmentsRouteWithChildren
   AuthRoute: typeof AuthRoute
   MyBookingsRoute: typeof MyBookingsRoute
@@ -137,6 +150,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApartmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -168,6 +188,7 @@ const ApartmentsRouteWithChildren = ApartmentsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ApartmentsRoute: ApartmentsRouteWithChildren,
   AuthRoute: AuthRoute,
   MyBookingsRoute: MyBookingsRoute,
