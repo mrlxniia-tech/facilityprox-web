@@ -137,6 +137,18 @@ function ApartmentDetail() {
                   Le paiement Stripe sera ajouté à l'étape suivante.
                 </p>
               </form>
+              {bookedRanges && bookedRanges.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-xs font-semibold tracking-wider text-muted-foreground mb-2">PÉRIODES DÉJÀ RÉSERVÉES</p>
+                  <ul className="space-y-1 text-xs">
+                    {bookedRanges.map((r, i) => (
+                      <li key={i} className="text-muted-foreground">
+                        {new Date(r.check_in).toLocaleDateString("fr-FR")} → {new Date(r.check_out).toLocaleDateString("fr-FR")}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </aside>
           </div>
         )}
