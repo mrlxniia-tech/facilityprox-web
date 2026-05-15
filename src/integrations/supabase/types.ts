@@ -106,6 +106,39 @@ export type Database = {
           },
         ]
       }
+      owner_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["owner_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["owner_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["owner_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -174,6 +207,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "owner" | "client"
       booking_status: "pending" | "confirmed" | "cancelled"
+      owner_request_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -303,6 +337,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "owner", "client"],
       booking_status: ["pending", "confirmed", "cancelled"],
+      owner_request_status: ["pending", "approved", "rejected"],
     },
   },
 } as const

@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, MapPin } from "lucide-react";
+import { LogOut, MapPin, Search } from "lucide-react";
 
 export const Route = createFileRoute("/apartments")({
   component: ApartmentsPage,
@@ -32,6 +33,28 @@ function ApartmentsPage() {
     },
   });
 
+  const [city, setCity] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minCapacity, setMinCapacity] = useState("");
+
+  const cities = useMemo(() => {
+    const s = new Set<string>();
+    apartments?.forEach((a) => s.add(a.city));
+    return Array.from(s).sort();
+  }, [apartments]);
+
+  const filtered = useMemo(() => {
+    return (apartments ?? []).filter((a) => {
+      if (city && a.city !== city) return false;
+      if (maxPrice && Number(a.price_per_night) > Number(maxPrice)) return false;
+      if (minCapacity && a.capacity < Number(minCapacity)) return false;
+      return true;
+    });
+  }, [apartments, city, maxPrice, minCapacity]);
+
+  const reset = () => { setCity(""); setMaxPrice(""); setMinCapacity(""); };
+  const hasFilters = city || maxPrice || minCapacity;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto max-w-6xl px-4 pt-8 pb-6 flex items-center justify-between">
@@ -55,17 +78,38 @@ function ApartmentsPage() {
       <main className="mx-auto max-w-6xl px-4 pb-24">
         <h2 className="text-3xl font-bold mb-6">Nos appartements exclusifs</h2>
 
+        <div className="rounded-xl border border-white/15 p-4 mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-end">
+          <Field label="Ville">
+            <select value={city} onChange={(e) => setCity(e.target.value)} className="inp">
+              <option value="">Toutes</option>
+              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+          <Field label="Prix max / nuit (€)">
+            <input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="inp" />
+          </Field>
+          <Field label="Voyageurs (min)">
+            <input type="number" min={1} value={minCapacity} onChange={(e) => setMinCapacity(e.target.value)} className="inp" />
+          </Field>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" /> {filtered.length} résultat{filtered.length > 1 ? "s" : ""}</span>
+            {hasFilters && (
+              <button onClick={reset} className="text-xs underline text-muted-foreground hover:text-foreground ml-auto">Effacer</button>
+            )}
+          </div>
+        </div>
+
         {isLoading && <p className="text-muted-foreground">Chargement…</p>}
 
-        {!isLoading && (apartments?.length ?? 0) === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div className="rounded-xl border border-white/15 p-10 text-center">
-            <p className="text-lg font-semibold">Aucun appartement publié pour le moment</p>
-            <p className="text-muted-foreground text-sm mt-2">Les propriétaires peuvent ajouter leurs biens depuis leur espace.</p>
+            <p className="text-lg font-semibold">{hasFilters ? "Aucun appartement ne correspond" : "Aucun appartement publié pour le moment"}</p>
+            <p className="text-muted-foreground text-sm mt-2">{hasFilters ? "Essayez d'élargir vos critères." : "Les propriétaires peuvent ajouter leurs biens depuis leur espace."}</p>
           </div>
         )}
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {apartments?.map((a) => (
+          {filtered.map((a) => (
             <Link
               to="/apartments/$id"
               params={{ id: a.id }}
@@ -95,7 +139,18 @@ function ApartmentsPage() {
             </Link>
           ))}
         </div>
+
+        <style>{`.inp{width:100%;border-radius:.375rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);padding:.5rem .75rem;font-size:.875rem;color:inherit}`}</style>
       </main>
     </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <div className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground">{label}</div>
+      {children}
+    </label>
   );
 }
