@@ -50,6 +50,9 @@ function Header() {
         {user && (
           <Link to="/my-bookings" className="text-muted-foreground hover:text-foreground hidden sm:inline">Mes résas</Link>
         )}
+        {user && (
+          <Link to="/profile" className="text-muted-foreground hover:text-foreground hidden sm:inline">Profil</Link>
+        )}
         {user && (roles.includes("owner") || roles.includes("admin")) && (
           <Link to="/owner" className="text-muted-foreground hover:text-foreground hidden sm:inline">Propriétaire</Link>
         )}

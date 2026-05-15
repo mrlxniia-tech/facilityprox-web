@@ -9,14 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as MyBookingsRouteImport } from './routes/my-bookings'
+import { Route as BecomeOwnerRouteImport } from './routes/become-owner'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ApartmentsRouteImport } from './routes/apartments'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApartmentsIdRouteImport } from './routes/apartments.$id'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OwnerRoute = OwnerRouteImport.update({
   id: '/owner',
   path: '/owner',
@@ -25,6 +32,11 @@ const OwnerRoute = OwnerRouteImport.update({
 const MyBookingsRoute = MyBookingsRouteImport.update({
   id: '/my-bookings',
   path: '/my-bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BecomeOwnerRoute = BecomeOwnerRouteImport.update({
+  id: '/become-owner',
+  path: '/become-owner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -58,8 +70,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/become-owner': typeof BecomeOwnerRoute
   '/my-bookings': typeof MyBookingsRoute
   '/owner': typeof OwnerRoute
+  '/profile': typeof ProfileRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRoutesByTo {
@@ -67,8 +81,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/become-owner': typeof BecomeOwnerRoute
   '/my-bookings': typeof MyBookingsRoute
   '/owner': typeof OwnerRoute
+  '/profile': typeof ProfileRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRoutesById {
@@ -77,8 +93,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/apartments': typeof ApartmentsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/become-owner': typeof BecomeOwnerRoute
   '/my-bookings': typeof MyBookingsRoute
   '/owner': typeof OwnerRoute
+  '/profile': typeof ProfileRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
 export interface FileRouteTypes {
@@ -88,8 +106,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/apartments'
     | '/auth'
+    | '/become-owner'
     | '/my-bookings'
     | '/owner'
+    | '/profile'
     | '/apartments/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,8 +117,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/apartments'
     | '/auth'
+    | '/become-owner'
     | '/my-bookings'
     | '/owner'
+    | '/profile'
     | '/apartments/$id'
   id:
     | '__root__'
@@ -106,8 +128,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/apartments'
     | '/auth'
+    | '/become-owner'
     | '/my-bookings'
     | '/owner'
+    | '/profile'
     | '/apartments/$id'
   fileRoutesById: FileRoutesById
 }
@@ -116,12 +140,21 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ApartmentsRoute: typeof ApartmentsRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BecomeOwnerRoute: typeof BecomeOwnerRoute
   MyBookingsRoute: typeof MyBookingsRoute
   OwnerRoute: typeof OwnerRoute
+  ProfileRoute: typeof ProfileRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/owner': {
       id: '/owner'
       path: '/owner'
@@ -134,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/my-bookings'
       fullPath: '/my-bookings'
       preLoaderRoute: typeof MyBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/become-owner': {
+      id: '/become-owner'
+      path: '/become-owner'
+      fullPath: '/become-owner'
+      preLoaderRoute: typeof BecomeOwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -191,9 +231,21 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ApartmentsRoute: ApartmentsRouteWithChildren,
   AuthRoute: AuthRoute,
+  BecomeOwnerRoute: BecomeOwnerRoute,
   MyBookingsRoute: MyBookingsRoute,
   OwnerRoute: OwnerRoute,
+  ProfileRoute: ProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
