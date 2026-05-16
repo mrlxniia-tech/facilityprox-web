@@ -6,8 +6,15 @@ import logo from "@/assets/logo.jpg";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut, MapPin, Search } from "lucide-react";
 
+type AptSearch = { city?: string; maxPrice?: string; minCapacity?: string };
+
 export const Route = createFileRoute("/apartments")({
   component: ApartmentsPage,
+  validateSearch: (s: Record<string, unknown>): AptSearch => ({
+    city: typeof s.city === "string" ? s.city : undefined,
+    maxPrice: typeof s.maxPrice === "string" ? s.maxPrice : undefined,
+    minCapacity: typeof s.minCapacity === "string" ? s.minCapacity : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Appartements — FacilityProx" },
