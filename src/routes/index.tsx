@@ -57,6 +57,9 @@ function Header() {
           <Link to="/owner" className="text-muted-foreground hover:text-foreground hidden sm:inline">Propriétaire</Link>
         )}
         {user && roles.includes("admin") && (
+          <Link to="/planning" className="text-muted-foreground hover:text-foreground hidden sm:inline">Planning</Link>
+        )}
+        {user && roles.includes("admin") && (
           <Link to="/admin" className="text-muted-foreground hover:text-foreground hidden sm:inline">Admin</Link>
         )}
         {user ? (
