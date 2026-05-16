@@ -115,26 +115,51 @@ function Hero() {
 }
 
 function SearchBar() {
+  const navigate = useNavigate();
+  const [destination, setDestination] = useState("");
+  const [travelers, setTravelers] = useState("");
+
+  const onSearch = () => {
+    navigate({
+      to: "/apartments",
+      search: {
+        city: destination.trim() || undefined,
+        minCapacity: travelers || undefined,
+      },
+    });
+  };
+
   return (
     <section className="mt-6 rounded-xl border border-white/15 p-6">
       <div className="grid gap-6 md:grid-cols-[1fr,auto]">
         <div className="space-y-4">
           <Field label="DESTINATION">
-            <input className="w-full rounded-md bg-white px-3 py-2 text-black" placeholder="Ville, quartier, adresse…" />
+            <input
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onSearch()}
+              className="w-full rounded-md bg-white px-3 py-2 text-black"
+              placeholder="Ville (ex. Paris)…"
+            />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label={<span className="flex items-center gap-2">DATES (Arrivée <Dot color="oklch(0.65 0.18 145)" /> / Départ <Dot color="oklch(0.55 0.2 25)" />)</span>}>
               <div className="flex items-center gap-2 rounded-md bg-white px-3 py-2 text-black">
-                <span>10</span>
-                <span className="text-black/40">/</span>
-                <span>20</span>
+                <span className="text-black/50 text-sm">À choisir sur la fiche</span>
                 <Calendar className="ml-auto h-4 w-4" />
               </div>
             </Field>
             <Field label="VOYAGEURS">
               <div className="flex items-center gap-2 rounded-md bg-white px-3 py-2 text-black">
                 <Users className="h-4 w-4" />
-                <span className="ml-auto text-black/60">▾</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={travelers}
+                  onChange={(e) => setTravelers(e.target.value)}
+                  placeholder="2"
+                  className="ml-auto w-full bg-transparent outline-none text-right"
+                />
               </div>
             </Field>
           </div>
@@ -144,6 +169,7 @@ function SearchBar() {
             <input className="w-full rounded-md border border-white/30 bg-transparent px-3 py-2" />
           </Field>
           <button
+            onClick={onSearch}
             className="mt-7 flex w-full items-center justify-center gap-2 rounded-md py-3 font-semibold"
             style={{ background: teal, color: "oklch(0.15 0.02 200)" }}
           >
