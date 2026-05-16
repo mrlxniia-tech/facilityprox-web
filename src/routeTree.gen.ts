@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PlanningRouteImport } from './routes/planning'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as MyBookingsRouteImport } from './routes/my-bookings'
 import { Route as BecomeOwnerRouteImport } from './routes/become-owner'
@@ -22,6 +23,11 @@ import { Route as ApartmentsIdRouteImport } from './routes/apartments.$id'
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanningRoute = PlanningRouteImport.update({
+  id: '/planning',
+  path: '/planning',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OwnerRoute = OwnerRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/become-owner': typeof BecomeOwnerRoute
   '/my-bookings': typeof MyBookingsRoute
   '/owner': typeof OwnerRoute
+  '/planning': typeof PlanningRoute
   '/profile': typeof ProfileRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/become-owner': typeof BecomeOwnerRoute
   '/my-bookings': typeof MyBookingsRoute
   '/owner': typeof OwnerRoute
+  '/planning': typeof PlanningRoute
   '/profile': typeof ProfileRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/become-owner': typeof BecomeOwnerRoute
   '/my-bookings': typeof MyBookingsRoute
   '/owner': typeof OwnerRoute
+  '/planning': typeof PlanningRoute
   '/profile': typeof ProfileRoute
   '/apartments/$id': typeof ApartmentsIdRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/become-owner'
     | '/my-bookings'
     | '/owner'
+    | '/planning'
     | '/profile'
     | '/apartments/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/become-owner'
     | '/my-bookings'
     | '/owner'
+    | '/planning'
     | '/profile'
     | '/apartments/$id'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/become-owner'
     | '/my-bookings'
     | '/owner'
+    | '/planning'
     | '/profile'
     | '/apartments/$id'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   BecomeOwnerRoute: typeof BecomeOwnerRoute
   MyBookingsRoute: typeof MyBookingsRoute
   OwnerRoute: typeof OwnerRoute
+  PlanningRoute: typeof PlanningRoute
   ProfileRoute: typeof ProfileRoute
 }
 
@@ -153,6 +166,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planning': {
+      id: '/planning'
+      path: '/planning'
+      fullPath: '/planning'
+      preLoaderRoute: typeof PlanningRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/owner': {
@@ -234,6 +254,7 @@ const rootRouteChildren: RootRouteChildren = {
   BecomeOwnerRoute: BecomeOwnerRoute,
   MyBookingsRoute: MyBookingsRoute,
   OwnerRoute: OwnerRoute,
+  PlanningRoute: PlanningRoute,
   ProfileRoute: ProfileRoute,
 }
 export const routeTree = rootRouteImport
