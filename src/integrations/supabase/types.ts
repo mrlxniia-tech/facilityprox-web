@@ -139,6 +139,45 @@ export type Database = {
         }
         Relationships: []
       }
+      planning_tasks: {
+        Row: {
+          assignee: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["task_priority"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -208,6 +247,8 @@ export type Database = {
       app_role: "admin" | "owner" | "client"
       booking_status: "pending" | "confirmed" | "cancelled"
       owner_request_status: "pending" | "approved" | "rejected"
+      task_priority: "low" | "medium" | "high"
+      task_status: "todo" | "in_progress" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -338,6 +379,8 @@ export const Constants = {
       app_role: ["admin", "owner", "client"],
       booking_status: ["pending", "confirmed", "cancelled"],
       owner_request_status: ["pending", "approved", "rejected"],
+      task_priority: ["low", "medium", "high"],
+      task_status: ["todo", "in_progress", "done"],
     },
   },
 } as const
