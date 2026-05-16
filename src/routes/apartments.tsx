@@ -27,6 +27,7 @@ const teal = "oklch(0.78 0.13 195)";
 
 function ApartmentsPage() {
   const { user, signOut } = useAuth();
+  const search = Route.useSearch();
   const { data: apartments, isLoading } = useQuery({
     queryKey: ["apartments"],
     queryFn: async () => {
@@ -40,9 +41,9 @@ function ApartmentsPage() {
     },
   });
 
-  const [city, setCity] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [minCapacity, setMinCapacity] = useState("");
+  const [city, setCity] = useState(search.city ?? "");
+  const [maxPrice, setMaxPrice] = useState(search.maxPrice ?? "");
+  const [minCapacity, setMinCapacity] = useState(search.minCapacity ?? "");
 
   const cities = useMemo(() => {
     const s = new Set<string>();
