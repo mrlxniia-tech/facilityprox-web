@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -35,9 +35,9 @@ function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
 
-  if (!loading && session) {
-    navigate({ to: "/" });
-  }
+  useEffect(() => {
+    if (!loading && session) navigate({ to: "/" });
+  }, [loading, session, navigate]);
 
   const onLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
