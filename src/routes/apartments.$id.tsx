@@ -1,15 +1,23 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Star, Trash2 } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 export const Route = createFileRoute("/apartments/$id")({
   component: ApartmentDetail,
 });
+
+type Review = {
+  id: string;
+  client_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+};
 
 const teal = "oklch(0.78 0.13 195)";
 
@@ -111,6 +119,8 @@ function ApartmentDetail() {
               {apt.description && (
                 <p className="mt-6 leading-relaxed text-foreground/90 whitespace-pre-line">{apt.description}</p>
               )}
+
+              <ReviewsSection apartmentId={apt.id} />
             </div>
 
             <aside className="rounded-xl border border-white/15 p-5 h-fit lg:sticky lg:top-6">
@@ -163,5 +173,171 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <div className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground">{label}</div>
       {children}
     </label>
+  );
+}
+
+function Stars({ value, onChange, size = 16 }: { value: number; onChange?: (v: number) => void; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange?.(n)}
+          disabled={!onChange}
+          className={onChange ? "cursor-pointer" : "cursor-default"}
+        >
+          <Star
+            style={{ width: size, height: size }}
+            className={n <= value ? "fill-current" : ""}
+            color={n <= value ? teal : "oklch(0.5 0.02 200)"}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ReviewsSection({ apartmentId }: { apartmentId: string }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [rating, setRating] = useState(5);
+  const [busy, setBusy] = useState(false);
+
+  const { data: reviews } = useQuery({
+    queryKey: ["reviews", apartmentId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("apartment_id", apartmentId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as Review[];
+    },
+  });
+
+  const { data: canReview } = useQuery({
+    enabled: !!user,
+    queryKey: ["can-review", apartmentId, user?.id],
+    queryFn: async () => {
+      const [{ data: bookings }, { data: existing }] = await Promise.all([
+        supabase
+          .from("bookings")
+          .select("id")
+          .eq("apartment_id", apartmentId)
+          .eq("client_id", user!.id)
+          .neq("status", "cancelled")
+          .limit(1),
+        supabase
+          .from("reviews")
+          .select("id")
+          .eq("apartment_id", apartmentId)
+          .eq("client_id", user!.id)
+          .maybeSingle(),
+      ]);
+      return { hasBooking: (bookings?.length ?? 0) > 0, hasReview: !!existing };
+    },
+  });
+
+  const avg = reviews && reviews.length > 0
+    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+    : 0;
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) return toast.error("Connectez-vous");
+    const fd = new FormData(e.currentTarget);
+    const comment = String(fd.get("comment") ?? "").trim() || null;
+    setBusy(true);
+    const { error } = await supabase.from("reviews").insert({
+      apartment_id: apartmentId,
+      client_id: user.id,
+      rating,
+      comment,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Avis publié, merci !");
+    qc.invalidateQueries({ queryKey: ["reviews", apartmentId] });
+    qc.invalidateQueries({ queryKey: ["can-review", apartmentId, user.id] });
+    (e.target as HTMLFormElement).reset();
+    setRating(5);
+  };
+
+  const onDelete = async (id: string) => {
+    if (!confirm("Supprimer votre avis ?")) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Avis supprimé");
+    qc.invalidateQueries({ queryKey: ["reviews", apartmentId] });
+    qc.invalidateQueries({ queryKey: ["can-review", apartmentId, user?.id] });
+  };
+
+  return (
+    <section className="mt-10 pt-8 border-t border-white/10">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-2xl font-bold">Avis des voyageurs</h2>
+        {reviews && reviews.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Stars value={Math.round(avg)} />
+            <span className="text-sm text-muted-foreground">
+              {avg.toFixed(1)} · {reviews.length} avis
+            </span>
+          </div>
+        )}
+      </div>
+
+      {user && canReview?.hasBooking && !canReview.hasReview && (
+        <form onSubmit={onSubmit} className="rounded-xl border border-white/15 p-4 mb-6 bg-white/[0.02]">
+          <p className="text-sm font-semibold mb-2">Laissez votre avis</p>
+          <div className="mb-3"><Stars value={rating} onChange={setRating} size={22} /></div>
+          <textarea
+            name="comment"
+            maxLength={1000}
+            rows={3}
+            placeholder="Comment s'est passé votre séjour ?"
+            className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm mb-3"
+          />
+          <button
+            disabled={busy}
+            className="rounded-md px-4 py-2 font-semibold text-sm disabled:opacity-50"
+            style={{ background: teal, color: "oklch(0.15 0.02 200)" }}
+          >
+            {busy ? "…" : "Publier"}
+          </button>
+        </form>
+      )}
+
+      {user && !canReview?.hasBooking && (
+        <p className="text-sm text-muted-foreground italic mb-6">
+          Seuls les voyageurs ayant réservé peuvent laisser un avis.
+        </p>
+      )}
+
+      <div className="space-y-4">
+        {reviews?.length === 0 && (
+          <p className="text-sm text-muted-foreground">Aucun avis pour le moment.</p>
+        )}
+        {reviews?.map((r) => (
+          <div key={r.id} className="rounded-lg border border-white/10 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <Stars value={r.rating} />
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground">
+                  {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                </span>
+                {user?.id === r.client_id && (
+                  <button onClick={() => onDelete(r.id)} className="text-muted-foreground hover:text-red-400">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+            {r.comment && <p className="text-sm text-foreground/90">{r.comment}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
