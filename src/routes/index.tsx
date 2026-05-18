@@ -84,12 +84,23 @@ function Header() {
 }
 
 function Nav() {
-  const items = ["HÉBERGEMENTS", "EXPÉRIENCES", "OFFRES", "AIDE"];
+  const { user, roles } = useAuth();
+  const items: { label: string; to: string }[] = [
+    { label: "HÉBERGEMENTS", to: "/apartments" },
+  ];
+  if (user) items.push({ label: "MES RÉSAS", to: "/my-bookings" });
+  if (user && !roles.includes("owner") && !roles.includes("admin")) {
+    items.push({ label: "DEVENIR PROPRIÉTAIRE", to: "/become-owner" });
+  }
+  if (user && (roles.includes("owner") || roles.includes("admin"))) {
+    items.push({ label: "MES BIENS", to: "/owner" });
+  }
+  items.push({ label: user ? "MON PROFIL" : "CONNEXION", to: user ? "/profile" : "/auth" });
   return (
-    <nav className="rounded-xl bg-white text-black px-6 py-4 flex flex-wrap gap-x-8 gap-y-2 text-sm font-semibold">
+    <nav className="rounded-xl bg-white text-black px-6 py-4 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
       {items.map((i, idx) => (
-        <div key={i} className="flex items-center gap-8">
-          <a href="#" className="hover:opacity-70">{i}</a>
+        <div key={i.label} className="flex items-center gap-6">
+          <Link to={i.to} className="hover:opacity-70">{i.label}</Link>
           {idx < items.length - 1 && <span className="text-black/30">|</span>}
         </div>
       ))}
@@ -100,19 +111,19 @@ function Nav() {
 function Hero() {
   return (
     <section className="mt-4 grid grid-cols-3 gap-2 rounded-xl overflow-hidden">
-      <div className="col-span-2 relative">
-        <img src={apt1} alt="Appartement exclusif" className="h-80 w-full object-cover" width={1280} height={720} />
+      <Link to="/apartments" className="col-span-2 relative group">
+        <img src={apt1} alt="Appartement exclusif" className="h-80 w-full object-cover transition group-hover:scale-[1.02]" width={1280} height={720} />
         <h2 className="absolute bottom-4 left-5 text-2xl font-bold drop-shadow-lg">NOS APPARTEMENTS EXCLUSIFS</h2>
-      </div>
-      <div className="relative">
-        <img src={apt2} alt="Cuisine moderne" className="h-80 w-full object-cover" loading="lazy" width={640} height={720} />
-        <button className="absolute inset-0 flex items-center justify-center" aria-label="Lecture vidéo">
+      </Link>
+      <Link to="/apartments" className="relative group">
+        <img src={apt2} alt="Cuisine moderne" className="h-80 w-full object-cover transition group-hover:scale-[1.02]" loading="lazy" width={640} height={720} />
+        <span className="absolute inset-0 flex items-center justify-center">
           <span className="rounded-full bg-black/50 p-4 ring-2 ring-white/80">
             <Play className="h-8 w-8 text-white" fill="white" />
           </span>
-        </button>
-        <span className="absolute bottom-3 right-3 text-sm italic text-white/90">Style RBNB</span>
-      </div>
+        </span>
+        <span className="absolute bottom-3 right-3 text-sm italic text-white/90">Découvrir</span>
+      </Link>
     </section>
   );
 }
@@ -286,11 +297,13 @@ function Options() {
 function Footer() {
   return (
     <footer className="border-t border-white/10">
-      <div className="mx-auto max-w-6xl px-4 py-6 flex flex-wrap justify-end gap-6 text-sm text-muted-foreground">
-        <a href="#">À propos</a>
-        <a href="#">Conditions</a>
-        <a href="#">Confidentialité</a>
-        <a href="#">Carrières</a>
+      <div className="mx-auto max-w-6xl px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+        <span>© {new Date().getFullYear()} FacilityProx — Tous droits réservés</span>
+        <div className="flex flex-wrap gap-6">
+          <Link to="/apartments" className="hover:text-foreground">Appartements</Link>
+          <Link to="/auth" className="hover:text-foreground">Connexion</Link>
+          <a href="mailto:contact@facilityprox.com" className="hover:text-foreground">Contact</a>
+        </div>
       </div>
     </footer>
   );
