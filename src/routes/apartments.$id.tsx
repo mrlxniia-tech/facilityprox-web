@@ -119,6 +119,8 @@ function ApartmentDetail() {
               {apt.description && (
                 <p className="mt-6 leading-relaxed text-foreground/90 whitespace-pre-line">{apt.description}</p>
               )}
+
+              <ReviewsSection apartmentId={apt.id} />
             </div>
 
             <aside className="rounded-xl border border-white/15 p-5 h-fit lg:sticky lg:top-6">
