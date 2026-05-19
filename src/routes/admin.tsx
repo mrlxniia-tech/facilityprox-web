@@ -83,7 +83,36 @@ function AdminPage() {
     qc.invalidateQueries({ queryKey: ["admin-users"] });
   };
 
+  const { data: messages } = useQuery({
+    enabled: roles.includes("admin"),
+    queryKey: ["admin-contact-messages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contact_messages")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const toggleRead = async (id: string, is_read: boolean) => {
+    const { error } = await supabase.from("contact_messages").update({ is_read: !is_read }).eq("id", id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["admin-contact-messages"] });
+  };
+
+  const deleteMessage = async (id: string) => {
+    if (!confirm("Supprimer ce message ?")) return;
+    const { error } = await supabase.from("contact_messages").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Supprimé");
+    qc.invalidateQueries({ queryKey: ["admin-contact-messages"] });
+  };
+
   const pendingReqs = requests?.filter((r) => r.status === "pending") ?? [];
+  const unreadCount = messages?.filter((m) => !m.is_read).length ?? 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
