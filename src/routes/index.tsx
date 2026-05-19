@@ -37,42 +37,43 @@ function Index() {
 function Header() {
   const { user, roles, signOut } = useAuth();
   return (
-    <header className="mx-auto max-w-6xl px-4 pt-8 pb-6 flex items-center justify-between">
-      <Link to="/" className="flex items-center gap-3">
-        <img src={logo} alt="FacilityProx logo" className="h-16 w-16 rounded-full object-cover ring-1 ring-white/10" />
-        <div className="leading-tight">
-          <h1 className="text-2xl font-extrabold tracking-wide" style={{ color: teal }}>FACILITYPROX</h1>
-          <p className="text-[11px] tracking-[0.3em] text-muted-foreground">POUR VOUS AIDER</p>
+    <header className="mx-auto max-w-6xl px-4 pt-6 pb-6 flex items-center justify-between gap-3">
+      <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
+        <img src={logo} alt="FacilityProx logo" className="h-10 w-10 sm:h-16 sm:w-16 rounded-full object-cover ring-1 ring-white/10 flex-shrink-0" />
+        <div className="leading-tight min-w-0">
+          <h1 className="text-base sm:text-2xl font-extrabold tracking-wide truncate" style={{ color: teal }}>FACILITYPROX</h1>
+          <p className="hidden sm:block text-[11px] tracking-[0.3em] text-muted-foreground">POUR VOUS AIDER</p>
         </div>
       </Link>
-      <div className="flex items-center gap-3 sm:gap-4 text-sm">
-        <Link to="/apartments" className="text-muted-foreground hover:text-foreground hidden sm:inline">Appartements</Link>
+      <div className="flex items-center gap-3 sm:gap-4 text-sm flex-shrink-0">
+        <Link to="/apartments" className="text-muted-foreground hover:text-foreground hidden md:inline">Appartements</Link>
         {user && (
-          <Link to="/my-bookings" className="text-muted-foreground hover:text-foreground hidden sm:inline">Mes résas</Link>
+          <Link to="/my-bookings" className="text-muted-foreground hover:text-foreground hidden md:inline">Mes résas</Link>
         )}
         {user && (
-          <Link to="/profile" className="text-muted-foreground hover:text-foreground hidden sm:inline">Profil</Link>
+          <Link to="/profile" className="text-muted-foreground hover:text-foreground hidden md:inline">Profil</Link>
         )}
         {user && (roles.includes("owner") || roles.includes("admin")) && (
-          <Link to="/owner" className="text-muted-foreground hover:text-foreground hidden sm:inline">Propriétaire</Link>
+          <Link to="/owner" className="text-muted-foreground hover:text-foreground hidden md:inline">Propriétaire</Link>
         )}
         {user && roles.includes("admin") && (
-          <Link to="/planning" className="text-muted-foreground hover:text-foreground hidden sm:inline">Planning</Link>
+          <Link to="/planning" className="text-muted-foreground hover:text-foreground hidden md:inline">Planning</Link>
         )}
         {user && roles.includes("admin") && (
-          <Link to="/admin" className="text-muted-foreground hover:text-foreground hidden sm:inline">Admin</Link>
+          <Link to="/admin" className="text-muted-foreground hover:text-foreground hidden md:inline">Admin</Link>
         )}
         {user ? (
           <button
             onClick={() => signOut()}
-            className="flex items-center gap-2 rounded-md px-3 sm:px-4 py-2 text-sm font-semibold border border-white/20 hover:bg-white/5"
+            aria-label="Déconnexion"
+            className="flex items-center gap-2 rounded-md px-2.5 sm:px-4 py-2 text-sm font-semibold border border-white/20 hover:bg-white/5"
           >
             <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">Déconnexion</span>
           </button>
         ) : (
           <Link
             to="/auth"
-            className="rounded-md px-4 sm:px-5 py-2 text-sm font-semibold"
+            className="rounded-md px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap"
             style={{ background: teal, color: "oklch(0.15 0.02 200)" }}
           >
             CONNEXION
