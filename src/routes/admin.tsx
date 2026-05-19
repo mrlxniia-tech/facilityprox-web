@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Home, User as UserIcon, Check, X } from "lucide-react";
+import { ArrowLeft, Shield, Home, User as UserIcon, Check, X, Mail, Trash2 } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 export const Route = createFileRoute("/admin")({
