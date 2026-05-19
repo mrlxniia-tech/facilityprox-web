@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Home, User as UserIcon, Check, X } from "lucide-react";
+import { ArrowLeft, Shield, Home, User as UserIcon, Check, X, Mail, Trash2 } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
 export const Route = createFileRoute("/admin")({
@@ -83,7 +83,36 @@ function AdminPage() {
     qc.invalidateQueries({ queryKey: ["admin-users"] });
   };
 
+  const { data: messages } = useQuery({
+    enabled: roles.includes("admin"),
+    queryKey: ["admin-contact-messages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contact_messages")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const toggleRead = async (id: string, is_read: boolean) => {
+    const { error } = await supabase.from("contact_messages").update({ is_read: !is_read }).eq("id", id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["admin-contact-messages"] });
+  };
+
+  const deleteMessage = async (id: string) => {
+    if (!confirm("Supprimer ce message ?")) return;
+    const { error } = await supabase.from("contact_messages").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Supprimé");
+    qc.invalidateQueries({ queryKey: ["admin-contact-messages"] });
+  };
+
   const pendingReqs = requests?.filter((r) => r.status === "pending") ?? [];
+  const unreadCount = messages?.filter((m) => !m.is_read).length ?? 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -161,6 +190,40 @@ function AdminPage() {
                     );
                   })}
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+            <Mail className="h-5 w-5" style={{ color: teal }} /> Messages reçus
+            {unreadCount > 0 && <span className="text-xs rounded-full px-2 py-0.5" style={{ background: teal, color: "oklch(0.15 0.02 200)" }}>{unreadCount} non lus</span>}
+          </h2>
+          {(!messages || messages.length === 0) && <p className="text-sm text-muted-foreground">Aucun message.</p>}
+          <div className="space-y-2">
+            {messages?.map((m) => (
+              <div key={m.id} className={`rounded-xl border p-4 ${m.is_read ? "border-white/10 bg-white/[0.01]" : "border-white/25 bg-white/[0.04]"}`}>
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <div className="font-bold flex items-center gap-2">
+                      {!m.is_read && <span className="inline-block h-2 w-2 rounded-full" style={{ background: teal }} />}
+                      {m.name}
+                    </div>
+                    <a href={`mailto:${m.email}`} className="text-xs text-muted-foreground hover:underline">{m.email}</a>
+                    {m.subject && <div className="text-xs mt-0.5">Sujet : <span className="font-semibold">{m.subject}</span></div>}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">{new Date(m.created_at).toLocaleString("fr-FR")}</span>
+                    <button onClick={() => toggleRead(m.id, m.is_read)} className="rounded px-2 py-1 border border-white/20 hover:bg-white/5">
+                      {m.is_read ? "Marquer non lu" : "Marquer lu"}
+                    </button>
+                    <button onClick={() => deleteMessage(m.id)} className="rounded p-1.5 border border-red-500/30 text-red-400 hover:bg-red-500/10">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm whitespace-pre-wrap text-foreground/90">{m.message}</p>
               </div>
             ))}
           </div>

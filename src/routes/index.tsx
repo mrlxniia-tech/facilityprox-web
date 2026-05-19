@@ -303,7 +303,7 @@ function Footer() {
         <div className="flex flex-wrap gap-6">
           <Link to="/apartments" className="hover:text-foreground">Appartements</Link>
           <Link to="/auth" className="hover:text-foreground">Connexion</Link>
-          <a href="mailto:contact@facilityprox.com" className="hover:text-foreground">Contact</a>
+          <Link to="/contact" className="hover:text-foreground">Contact</Link>
         </div>
       </div>
     </footer>
