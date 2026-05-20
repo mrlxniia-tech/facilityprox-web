@@ -178,6 +178,15 @@ function ApartmentsPage() {
                   </span>
                   <span className="text-xs text-muted-foreground">{a.capacity} pers.</span>
                 </div>
+                {(a.options ?? []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {((a.options ?? []) as string[]).slice(0, 3).map((o) => (
+                      <span key={o} className="text-[10px] rounded-full px-2 py-0.5 border border-white/15 text-muted-foreground">
+                        {OPTION_LABEL[o] ?? o}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </Link>
           ))}
