@@ -220,6 +220,26 @@ function ApartmentForm({ ownerId, initial, onClose, onSaved }: {
               </label>
             </div>
           </Field>
+          <Field label="Options">
+            <div className="flex flex-wrap gap-2">
+              {APARTMENT_OPTIONS.map((o) => {
+                const checked = options.includes(o.key);
+                return (
+                  <button
+                    type="button"
+                    key={o.key}
+                    onClick={() => toggleOpt(o.key)}
+                    className="text-xs rounded-full px-3 py-1.5 border transition"
+                    style={checked
+                      ? { background: teal, color: "oklch(0.15 0.02 200)", borderColor: teal }
+                      : { borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.75)" }}
+                  >
+                    {checked ? "✓ " : ""}{o.label}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
           <button disabled={busy} className="w-full rounded-md py-2.5 font-semibold disabled:opacity-50" style={{ background: teal, color: "oklch(0.15 0.02 200)" }}>
             {busy ? "…" : initial ? "Enregistrer" : "Créer"}
           </button>
