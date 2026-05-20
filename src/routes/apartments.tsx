@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut, MapPin, Search } from "lucide-react";
+import { APARTMENT_OPTIONS, OPTION_LABEL } from "@/lib/apartment-options";
 
-type AptSearch = { city?: string; maxPrice?: string; minCapacity?: string };
+type AptSearch = { city?: string; maxPrice?: string; minCapacity?: string; options?: string };
 
 export const Route = createFileRoute("/apartments")({
   component: ApartmentsPage,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/apartments")({
     city: typeof s.city === "string" ? s.city : undefined,
     maxPrice: typeof s.maxPrice === "string" ? s.maxPrice : undefined,
     minCapacity: typeof s.minCapacity === "string" ? s.minCapacity : undefined,
+    options: typeof s.options === "string" ? s.options : undefined,
   }),
   head: () => ({
     meta: [
