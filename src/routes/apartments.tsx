@@ -35,7 +35,7 @@ function ApartmentsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartments")
-        .select("id,title,city,price_per_night,capacity,image_url")
+        .select("id,title,city,price_per_night,capacity,image_url,options")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -46,6 +46,12 @@ function ApartmentsPage() {
   const [city, setCity] = useState(search.city ?? "");
   const [maxPrice, setMaxPrice] = useState(search.maxPrice ?? "");
   const [minCapacity, setMinCapacity] = useState(search.minCapacity ?? "");
+  const [opts, setOpts] = useState<string[]>(
+    search.options ? search.options.split(",").filter(Boolean) : [],
+  );
+
+  const toggleOpt = (k: string) =>
+    setOpts((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
 
   const cities = useMemo(() => {
     const s = new Set<string>();
@@ -58,12 +64,16 @@ function ApartmentsPage() {
       if (city && a.city !== city) return false;
       if (maxPrice && Number(a.price_per_night) > Number(maxPrice)) return false;
       if (minCapacity && a.capacity < Number(minCapacity)) return false;
+      if (opts.length > 0) {
+        const aOpts = (a.options ?? []) as string[];
+        if (!opts.every((o) => aOpts.includes(o))) return false;
+      }
       return true;
     });
-  }, [apartments, city, maxPrice, minCapacity]);
+  }, [apartments, city, maxPrice, minCapacity, opts]);
 
-  const reset = () => { setCity(""); setMaxPrice(""); setMinCapacity(""); };
-  const hasFilters = city || maxPrice || minCapacity;
+  const reset = () => { setCity(""); setMaxPrice(""); setMinCapacity(""); setOpts([]); };
+  const hasFilters = city || maxPrice || minCapacity || opts.length > 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
