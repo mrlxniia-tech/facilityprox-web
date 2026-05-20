@@ -160,42 +160,12 @@ function AdminPage() {
           </div>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3">Utilisateurs & rôles</h2>
-          {isLoading && <p>Chargement…</p>}
-          <div className="space-y-2">
-            {users?.map((u) => (
-              <div key={u.id} className="rounded-xl border border-white/15 p-4 flex flex-wrap items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold flex items-center gap-2">
-                    <UserIcon className="h-4 w-4" /> {u.full_name || "Sans nom"}
-                  </div>
-                  <div className="text-xs text-muted-foreground truncate">{u.id}</div>
-                  {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {ALL_ROLES.map((r) => {
-                    const has = u.roles.includes(r);
-                    return (
-                      <button
-                        key={r}
-                        onClick={() => toggleRole(u.id, r, has)}
-                        className="text-xs rounded px-3 py-1.5 font-semibold border transition"
-                        style={has
-                          ? { background: teal, color: "oklch(0.15 0.02 200)", borderColor: teal }
-                          : { borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)" }}
-                      >
-                        {r === "admin" && <Shield className="inline h-3 w-3 mr-1" />}
-                        {r === "owner" && <Home className="inline h-3 w-3 mr-1" />}
-                        {r}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <CreateUserCard onCreated={() => qc.invalidateQueries({ queryKey: ["admin-users"] })} />
+
+        <UserRoleSection id="admins" title="Administrateurs" icon={<Shield className="h-5 w-5" style={{ color: teal }} />} role="admin" users={users} loading={isLoading} toggleRole={toggleRole} />
+        <UserRoleSection id="owners" title="Propriétaires" icon={<Home className="h-5 w-5" style={{ color: teal }} />} role="owner" users={users} loading={isLoading} toggleRole={toggleRole} />
+        <UserRoleSection id="clients" title="Clients" icon={<UserIcon className="h-5 w-5" style={{ color: teal }} />} role="client" users={users} loading={isLoading} toggleRole={toggleRole} clientsFallback />
+
 
         <section>
           <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
