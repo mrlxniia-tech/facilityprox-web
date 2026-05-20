@@ -122,6 +122,24 @@ function ApartmentDetail() {
                 <p className="mt-6 leading-relaxed text-foreground/90 whitespace-pre-line">{apt.description}</p>
               )}
 
+              {((apt.options ?? []) as string[]).length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-2">OPTIONS INCLUSES</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {((apt.options ?? []) as string[]).map((o) => (
+                      <span key={o} className="text-xs rounded-full px-3 py-1 border border-white/20 bg-white/[0.04]">
+                        ✓ {OPTION_LABEL[o] ?? o}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8">
+                <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3">DISPONIBILITÉS</h3>
+                <BookingCalendar ranges={bookedRanges ?? []} />
+              </div>
+
               <ReviewsSection apartmentId={apt.id} />
             </div>
 
