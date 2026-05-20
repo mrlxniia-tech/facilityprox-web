@@ -237,6 +237,8 @@ function CalendarCard() {
 }
 
 function Options() {
+  const { roles } = useAuth();
+  const isAdmin = roles.includes("admin");
   const opts = [
     { t: "FRAIS MÉNAGE INCLUS", s: "Frais de ménage inclus dès la première nuit." },
     { t: "LOVE ROOM OPTIONS", s: "Options sur-mesure : pétales, champagne et collation." },
@@ -257,11 +259,17 @@ function Options() {
             </li>
           ))}
         </ul>
-        <div className="relative">
+        {isAdmin ? (
+          <div className="flex flex-wrap gap-2 text-xs">
+            <Link to="/admin" hash="admins" className="rounded-full border border-white/40 px-4 py-2 hover:bg-white/5">ADMINISTRATEURS</Link>
+            <Link to="/admin" hash="owners" className="rounded-full border border-white/40 px-4 py-2 hover:bg-white/5">PROPRIÉTAIRES</Link>
+            <Link to="/admin" hash="clients" className="rounded-full border border-white/40 px-4 py-2 hover:bg-white/5">CLIENTS</Link>
+          </div>
+        ) : (
           <div className="rounded-full border border-white/40 px-5 py-3 text-sm">
             ADMINISTRATEUR | PROPRIÉTAIRE | CLIENTS
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
