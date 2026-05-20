@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, Home, User as UserIcon, Check, X, Mail, Trash2 } from "lucide-react";
+import { ArrowLeft, Shield, Home, User as UserIcon, Check, X, Mail, Trash2, UserPlus } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+import { adminCreateUser } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -158,42 +160,12 @@ function AdminPage() {
           </div>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold mb-3">Utilisateurs & rôles</h2>
-          {isLoading && <p>Chargement…</p>}
-          <div className="space-y-2">
-            {users?.map((u) => (
-              <div key={u.id} className="rounded-xl border border-white/15 p-4 flex flex-wrap items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold flex items-center gap-2">
-                    <UserIcon className="h-4 w-4" /> {u.full_name || "Sans nom"}
-                  </div>
-                  <div className="text-xs text-muted-foreground truncate">{u.id}</div>
-                  {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {ALL_ROLES.map((r) => {
-                    const has = u.roles.includes(r);
-                    return (
-                      <button
-                        key={r}
-                        onClick={() => toggleRole(u.id, r, has)}
-                        className="text-xs rounded px-3 py-1.5 font-semibold border transition"
-                        style={has
-                          ? { background: teal, color: "oklch(0.15 0.02 200)", borderColor: teal }
-                          : { borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)" }}
-                      >
-                        {r === "admin" && <Shield className="inline h-3 w-3 mr-1" />}
-                        {r === "owner" && <Home className="inline h-3 w-3 mr-1" />}
-                        {r}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <CreateUserCard onCreated={() => qc.invalidateQueries({ queryKey: ["admin-users"] })} />
+
+        <UserRoleSection id="admins" title="Administrateurs" icon={<Shield className="h-5 w-5" style={{ color: teal }} />} role="admin" users={users} loading={isLoading} toggleRole={toggleRole} />
+        <UserRoleSection id="owners" title="Propriétaires" icon={<Home className="h-5 w-5" style={{ color: teal }} />} role="owner" users={users} loading={isLoading} toggleRole={toggleRole} />
+        <UserRoleSection id="clients" title="Clients" icon={<UserIcon className="h-5 w-5" style={{ color: teal }} />} role="client" users={users} loading={isLoading} toggleRole={toggleRole} clientsFallback />
+
 
         <section>
           <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
@@ -229,13 +201,129 @@ function AdminPage() {
           </div>
         </section>
 
-        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm">
-          <p className="font-bold mb-1">⚠️ Premier administrateur</p>
-          <p className="text-muted-foreground">
-            Pour créer le tout premier admin : <code className="bg-white/10 px-1 rounded">INSERT INTO user_roles (user_id, role) VALUES ('VOTRE_USER_ID', 'admin');</code>
-          </p>
-        </div>
       </main>
     </div>
+  );
+}
+
+type UserRow = { id: string; full_name: string | null; phone: string | null; created_at: string; roles: Role[] };
+
+function UserRoleSection({
+  id, title, icon, role, users, loading, toggleRole, clientsFallback,
+}: {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  role: Role;
+  users: UserRow[] | undefined;
+  loading: boolean;
+  toggleRole: (uid: string, r: Role, has: boolean) => void;
+  clientsFallback?: boolean;
+}) {
+  const list = (users ?? []).filter((u) =>
+    clientsFallback
+      ? !u.roles.includes("admin") && !u.roles.includes("owner")
+      : u.roles.includes(role),
+  );
+  return (
+    <section id={id} className="scroll-mt-20">
+      <h2 className="text-xl font-bold mb-3 flex items-center gap-2">{icon} {title} <span className="text-sm text-muted-foreground">({list.length})</span></h2>
+      {loading && <p>Chargement…</p>}
+      {!loading && list.length === 0 && <p className="text-sm text-muted-foreground">Aucun compte.</p>}
+      <div className="space-y-2">
+        {list.map((u) => (
+          <div key={u.id} className="rounded-xl border border-white/15 p-4 flex flex-wrap items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="font-bold flex items-center gap-2">
+                <UserIcon className="h-4 w-4" /> {u.full_name || "Sans nom"}
+              </div>
+              <div className="text-xs text-muted-foreground truncate">{u.id}</div>
+              {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {ALL_ROLES.map((r) => {
+                const has = u.roles.includes(r);
+                return (
+                  <button
+                    key={r}
+                    onClick={() => toggleRole(u.id, r, has)}
+                    className="text-xs rounded px-3 py-1.5 font-semibold border transition"
+                    style={has
+                      ? { background: teal, color: "oklch(0.15 0.02 200)", borderColor: teal }
+                      : { borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)" }}
+                  >
+                    {r === "admin" && <Shield className="inline h-3 w-3 mr-1" />}
+                    {r === "owner" && <Home className="inline h-3 w-3 mr-1" />}
+                    {r}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CreateUserCard({ onCreated }: { onCreated: () => void }) {
+  const create = useServerFn(adminCreateUser);
+  const [busy, setBusy] = useState(false);
+  const [role, setRole] = useState<Role>("owner");
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setBusy(true);
+    try {
+      await create({
+        data: {
+          email: String(fd.get("email")).trim(),
+          password: String(fd.get("password")),
+          fullName: String(fd.get("fullName")).trim(),
+          role,
+        },
+      });
+      toast.success("Compte créé");
+      (e.target as HTMLFormElement).reset();
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="rounded-xl border border-white/15 p-5 bg-white/[0.02]">
+      <h2 className="text-xl font-bold mb-3 flex items-center gap-2"><UserPlus className="h-5 w-5" style={{ color: teal }} /> Créer un compte</h2>
+      <form onSubmit={onSubmit} className="grid gap-3 md:grid-cols-2">
+        <label className="block">
+          <div className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground">Nom complet</div>
+          <input name="fullName" required maxLength={120} className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" />
+        </label>
+        <label className="block">
+          <div className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground">Email</div>
+          <input name="email" type="email" required maxLength={255} className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" />
+        </label>
+        <label className="block">
+          <div className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground">Mot de passe (6+ caractères)</div>
+          <input name="password" type="text" required minLength={6} maxLength={72} className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm" />
+        </label>
+        <label className="block">
+          <div className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground">Rôle</div>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="w-full rounded-md bg-white/5 border border-white/15 px-3 py-2 text-sm">
+            <option value="client">Client</option>
+            <option value="owner">Propriétaire</option>
+            <option value="admin">Administrateur</option>
+          </select>
+        </label>
+        <div className="md:col-span-2">
+          <button disabled={busy} className="rounded-md px-5 py-2.5 font-semibold disabled:opacity-50" style={{ background: teal, color: "oklch(0.15 0.02 200)" }}>
+            {busy ? "…" : "Créer le compte"}
+          </button>
+        </div>
+      </form>
+    </section>
   );
 }

@@ -24,6 +24,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_published: boolean
+          options: string[]
           owner_id: string
           price_per_night: number
           title: string
@@ -38,6 +39,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean
+          options?: string[]
           owner_id: string
           price_per_night: number
           title: string
@@ -52,6 +54,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean
+          options?: string[]
           owner_id?: string
           price_per_night?: number
           title?: string

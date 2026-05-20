@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut, MapPin, Search } from "lucide-react";
+import { APARTMENT_OPTIONS, OPTION_LABEL } from "@/lib/apartment-options";
 
-type AptSearch = { city?: string; maxPrice?: string; minCapacity?: string };
+type AptSearch = { city?: string; maxPrice?: string; minCapacity?: string; options?: string };
 
 export const Route = createFileRoute("/apartments")({
   component: ApartmentsPage,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/apartments")({
     city: typeof s.city === "string" ? s.city : undefined,
     maxPrice: typeof s.maxPrice === "string" ? s.maxPrice : undefined,
     minCapacity: typeof s.minCapacity === "string" ? s.minCapacity : undefined,
+    options: typeof s.options === "string" ? s.options : undefined,
   }),
   head: () => ({
     meta: [
@@ -33,7 +35,7 @@ function ApartmentsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("apartments")
-        .select("id,title,city,price_per_night,capacity,image_url")
+        .select("id,title,city,price_per_night,capacity,image_url,options")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -44,6 +46,12 @@ function ApartmentsPage() {
   const [city, setCity] = useState(search.city ?? "");
   const [maxPrice, setMaxPrice] = useState(search.maxPrice ?? "");
   const [minCapacity, setMinCapacity] = useState(search.minCapacity ?? "");
+  const [opts, setOpts] = useState<string[]>(
+    search.options ? search.options.split(",").filter(Boolean) : [],
+  );
+
+  const toggleOpt = (k: string) =>
+    setOpts((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
 
   const cities = useMemo(() => {
     const s = new Set<string>();
@@ -56,12 +64,16 @@ function ApartmentsPage() {
       if (city && a.city !== city) return false;
       if (maxPrice && Number(a.price_per_night) > Number(maxPrice)) return false;
       if (minCapacity && a.capacity < Number(minCapacity)) return false;
+      if (opts.length > 0) {
+        const aOpts = (a.options ?? []) as string[];
+        if (!opts.every((o) => aOpts.includes(o))) return false;
+      }
       return true;
     });
-  }, [apartments, city, maxPrice, minCapacity]);
+  }, [apartments, city, maxPrice, minCapacity, opts]);
 
-  const reset = () => { setCity(""); setMaxPrice(""); setMinCapacity(""); };
-  const hasFilters = city || maxPrice || minCapacity;
+  const reset = () => { setCity(""); setMaxPrice(""); setMinCapacity(""); setOpts([]); };
+  const hasFilters = city || maxPrice || minCapacity || opts.length > 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -86,24 +98,47 @@ function ApartmentsPage() {
       <main className="mx-auto max-w-6xl px-4 pb-24">
         <h2 className="text-3xl font-bold mb-6">Nos appartements exclusifs</h2>
 
-        <div className="rounded-xl border border-white/15 p-4 mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-end">
-          <Field label="Ville">
-            <select value={city} onChange={(e) => setCity(e.target.value)} className="inp">
-              <option value="">Toutes</option>
-              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </Field>
-          <Field label="Prix max / nuit (€)">
-            <input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="inp" />
-          </Field>
-          <Field label="Voyageurs (min)">
-            <input type="number" min={1} value={minCapacity} onChange={(e) => setMinCapacity(e.target.value)} className="inp" />
-          </Field>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" /> {filtered.length} résultat{filtered.length > 1 ? "s" : ""}</span>
-            {hasFilters && (
-              <button onClick={reset} className="text-xs underline text-muted-foreground hover:text-foreground ml-auto">Effacer</button>
-            )}
+        <div className="rounded-xl border border-white/15 p-4 mb-6 space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-end">
+            <Field label="Ville">
+              <select value={city} onChange={(e) => setCity(e.target.value)} className="inp">
+                <option value="">Toutes</option>
+                {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Prix max / nuit (€)">
+              <input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="inp" />
+            </Field>
+            <Field label="Voyageurs (min)">
+              <input type="number" min={1} value={minCapacity} onChange={(e) => setMinCapacity(e.target.value)} className="inp" />
+            </Field>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Search className="h-3 w-3" /> {filtered.length} résultat{filtered.length > 1 ? "s" : ""}</span>
+              {hasFilters && (
+                <button onClick={reset} className="text-xs underline text-muted-foreground hover:text-foreground ml-auto">Effacer</button>
+              )}
+            </div>
+          </div>
+          <div>
+            <div className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground">OPTIONS</div>
+            <div className="flex flex-wrap gap-2">
+              {APARTMENT_OPTIONS.map((o) => {
+                const checked = opts.includes(o.key);
+                return (
+                  <button
+                    key={o.key}
+                    type="button"
+                    onClick={() => toggleOpt(o.key)}
+                    className="text-xs rounded-full px-3 py-1.5 border transition"
+                    style={checked
+                      ? { background: teal, color: "oklch(0.15 0.02 200)", borderColor: teal }
+                      : { borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.75)" }}
+                  >
+                    {checked ? "✓ " : ""}{o.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -143,6 +178,15 @@ function ApartmentsPage() {
                   </span>
                   <span className="text-xs text-muted-foreground">{a.capacity} pers.</span>
                 </div>
+                {(a.options ?? []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {((a.options ?? []) as string[]).slice(0, 3).map((o) => (
+                      <span key={o} className="text-[10px] rounded-full px-2 py-0.5 border border-white/15 text-muted-foreground">
+                        {OPTION_LABEL[o] ?? o}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </Link>
           ))}

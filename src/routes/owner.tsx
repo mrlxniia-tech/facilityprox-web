@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Upload, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+import { APARTMENT_OPTIONS } from "@/lib/apartment-options";
 
 export const Route = createFileRoute("/owner")({
   component: OwnerPage,
@@ -24,6 +25,7 @@ type Apt = {
   capacity: number;
   image_url: string | null;
   is_published: boolean;
+  options: string[] | null;
 };
 
 function OwnerPage() {
@@ -150,6 +152,10 @@ function ApartmentForm({ ownerId, initial, onClose, onSaved }: {
 }) {
   const [busy, setBusy] = useState(false);
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [options, setOptions] = useState<string[]>(initial?.options ?? []);
+
+  const toggleOpt = (k: string) =>
+    setOptions((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
 
   const onUpload = async (file: File) => {
     setBusy(true);
@@ -176,6 +182,7 @@ function ApartmentForm({ ownerId, initial, onClose, onSaved }: {
       capacity: Number(fd.get("capacity")),
       image_url: imageUrl || null,
       is_published: true,
+      options,
     };
     setBusy(true);
     const q = initial
@@ -211,6 +218,26 @@ function ApartmentForm({ ownerId, initial, onClose, onSaved }: {
                 <Upload className="h-4 w-4" /> Choisir
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])} />
               </label>
+            </div>
+          </Field>
+          <Field label="Options">
+            <div className="flex flex-wrap gap-2">
+              {APARTMENT_OPTIONS.map((o) => {
+                const checked = options.includes(o.key);
+                return (
+                  <button
+                    type="button"
+                    key={o.key}
+                    onClick={() => toggleOpt(o.key)}
+                    className="text-xs rounded-full px-3 py-1.5 border transition"
+                    style={checked
+                      ? { background: teal, color: "oklch(0.15 0.02 200)", borderColor: teal }
+                      : { borderColor: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.75)" }}
+                  >
+                    {checked ? "✓ " : ""}{o.label}
+                  </button>
+                );
+              })}
             </div>
           </Field>
           <button disabled={busy} className="w-full rounded-md py-2.5 font-semibold disabled:opacity-50" style={{ background: teal, color: "oklch(0.15 0.02 200)" }}>

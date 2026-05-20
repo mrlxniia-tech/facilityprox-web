@@ -3,8 +3,9 @@ import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import apt1 from "@/assets/apartment-1.jpg";
 import apt2 from "@/assets/apartment-2.jpg";
-import { Calendar, CreditCard, FileText, HandCoins, LogOut, Play, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, CreditCard, FileText, HandCoins, LogOut, Play, Search, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { BookingCalendar } from "@/components/BookingCalendar";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -232,39 +233,12 @@ function FeatureCard({ icon, title }: { icon: React.ReactNode; title: React.Reac
 }
 
 function CalendarCard() {
-  const [month] = useState("JUIN 2024");
-  const days = ["Ju", "Lu", "Ma", "Mu", "Ji", "Ve", "Sa", "Su"];
-  // 5 weeks grid
-  const cells: { d: number; muted?: boolean; status?: "arr" | "dep" | "between" }[] = [
-    { d: 29, muted: true }, { d: 30, muted: true }, { d: 31, muted: true }, { d: 1 }, { d: 2 }, { d: 3 }, { d: 4 }, { d: 5 },
-    { d: 6 }, { d: 7 }, { d: 7 }, { d: 8 }, { d: 9 }, { d: 10, status: "arr" }, { d: 11 }, { d: 12 },
-    { d: 13 }, { d: 14, status: "between" }, { d: 15, status: "arr" }, { d: 15, status: "between" }, { d: 16, status: "between" }, { d: 17, status: "dep" }, { d: 18, status: "dep" }, { d: 19 },
-    { d: 20 }, { d: 21 }, { d: 22 }, { d: 22 }, { d: 23 }, { d: 24 }, { d: 25 }, { d: 26 },
-    { d: 27 }, { d: 28 }, { d: 29 }, { d: 30 }, { d: 30 }, { d: 1, muted: true }, { d: 2, muted: true }, { d: 3, muted: true },
-  ];
-  return (
-    <div className="rounded-xl bg-white text-black p-5">
-      <div className="flex items-center justify-between mb-4">
-        <button aria-label="Mois précédent"><ChevronLeft className="h-5 w-5" /></button>
-        <h3 className="font-bold tracking-wide">{month}</h3>
-        <button aria-label="Mois suivant"><ChevronRight className="h-5 w-5" /></button>
-      </div>
-      <div className="grid grid-cols-8 gap-1 text-center text-sm">
-        {days.map((d, i) => <div key={i} className="py-1 font-semibold text-black/70">{d}</div>)}
-        {cells.map((c, i) => {
-          const base = "rounded-md border py-2 text-xs leading-tight flex flex-col items-center justify-center min-h-[44px]";
-          if (c.muted) return <div key={i} className={`${base} border-black/10 text-black/30`}>{c.d}</div>;
-          if (c.status === "arr") return <div key={i} className={`${base} border-transparent text-white`} style={{ background: "oklch(0.55 0.18 145)" }}><span>{c.d}</span><span className="text-[9px] font-semibold">Arrivée</span></div>;
-          if (c.status === "dep") return <div key={i} className={`${base} border-transparent text-white`} style={{ background: "oklch(0.45 0.18 25)" }}><span>{c.d}</span><span className="text-[9px] font-semibold">Départ</span></div>;
-          if (c.status === "between") return <div key={i} className={`${base} border-transparent text-white`} style={{ background: "oklch(0.55 0.18 145)" }}>{c.d}</div>;
-          return <div key={i} className={`${base} border-black/15`}>{c.d}</div>;
-        })}
-      </div>
-    </div>
-  );
+  return <BookingCalendar />;
 }
 
 function Options() {
+  const { roles } = useAuth();
+  const isAdmin = roles.includes("admin");
   const opts = [
     { t: "FRAIS MÉNAGE INCLUS", s: "Frais de ménage inclus dès la première nuit." },
     { t: "LOVE ROOM OPTIONS", s: "Options sur-mesure : pétales, champagne et collation." },
@@ -285,11 +259,17 @@ function Options() {
             </li>
           ))}
         </ul>
-        <div className="relative">
+        {isAdmin ? (
+          <div className="flex flex-wrap gap-2 text-xs">
+            <Link to="/admin" hash="admins" className="rounded-full border border-white/40 px-4 py-2 hover:bg-white/5">ADMINISTRATEURS</Link>
+            <Link to="/admin" hash="owners" className="rounded-full border border-white/40 px-4 py-2 hover:bg-white/5">PROPRIÉTAIRES</Link>
+            <Link to="/admin" hash="clients" className="rounded-full border border-white/40 px-4 py-2 hover:bg-white/5">CLIENTS</Link>
+          </div>
+        ) : (
           <div className="rounded-full border border-white/40 px-5 py-3 text-sm">
             ADMINISTRATEUR | PROPRIÉTAIRE | CLIENTS
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
