@@ -3,8 +3,9 @@ import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import apt1 from "@/assets/apartment-1.jpg";
 import apt2 from "@/assets/apartment-2.jpg";
-import { Calendar, CreditCard, FileText, HandCoins, LogOut, Play, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, CreditCard, FileText, HandCoins, LogOut, Play, Search, Users } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { BookingCalendar } from "@/components/BookingCalendar";
 
 export const Route = createFileRoute("/")({
   component: Index,
