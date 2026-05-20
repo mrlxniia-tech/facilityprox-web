@@ -25,6 +25,7 @@ type Apt = {
   capacity: number;
   image_url: string | null;
   is_published: boolean;
+  options: string[] | null;
 };
 
 function OwnerPage() {
