@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Users, Star, Trash2 } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+import { BookingCalendar } from "@/components/BookingCalendar";
+import { OPTION_LABEL } from "@/lib/apartment-options";
 
 export const Route = createFileRoute("/apartments/$id")({
   component: ApartmentDetail,
