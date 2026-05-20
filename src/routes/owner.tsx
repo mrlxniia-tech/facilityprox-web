@@ -152,6 +152,10 @@ function ApartmentForm({ ownerId, initial, onClose, onSaved }: {
 }) {
   const [busy, setBusy] = useState(false);
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [options, setOptions] = useState<string[]>(initial?.options ?? []);
+
+  const toggleOpt = (k: string) =>
+    setOptions((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
 
   const onUpload = async (file: File) => {
     setBusy(true);
@@ -178,6 +182,7 @@ function ApartmentForm({ ownerId, initial, onClose, onSaved }: {
       capacity: Number(fd.get("capacity")),
       image_url: imageUrl || null,
       is_published: true,
+      options,
     };
     setBusy(true);
     const q = initial
