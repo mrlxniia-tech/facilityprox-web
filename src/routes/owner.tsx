@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Upload, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+import { APARTMENT_OPTIONS } from "@/lib/apartment-options";
 
 export const Route = createFileRoute("/owner")({
   component: OwnerPage,
